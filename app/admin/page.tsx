@@ -19,69 +19,46 @@ export default async function AdminPage() {
     redirect("/dashboard");
   }
 
-  const [users, products, subscriptions, payments] = await Promise.all([
-    prisma.user.findMany({
-      include: {
-        subscriptions: {
-          where: { status: { in: ["active", "trialing"] } },
-          include: { stripeProduct: true },
-          take: 1,
-          orderBy: { createdAt: "desc" },
-        },
-        _count: {
-          select: {
-            subscriptions: true,
-            paymentHistory: true,
+  const [users, subscriptions, totalUsersCount, totalRevenue] =
+    await Promise.all([
+      prisma.user.findMany({
+        include: {
+          subscriptions: {
+            where: { status: { in: ["active", "trialing"] } },
+            include: { stripeProduct: true },
+            take: 1,
+            orderBy: { createdAt: "desc" },
+          },
+          _count: {
+            select: {
+              subscriptions: true,
+              paymentHistory: true,
+            },
           },
         },
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.stripeProduct.findMany({
-      include: {
-        prices: { where: { active: true } },
-        _count: {
-          select: {
-            users: true,
-            subscriptions: true,
-          },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.userSubscription.findMany({
+        where: { status: { in: ["active", "trialing"] } },
+        include: {
+          user: { select: { name: true, email: true } },
+          stripeProduct: { select: { name: true } },
         },
-      },
-      orderBy: { name: "asc" },
-    }),
-    prisma.userSubscription.findMany({
-      where: { status: { in: ["active", "trialing"] } },
-      include: {
-        user: { select: { name: true, email: true } },
-        stripeProduct: { select: { name: true } },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-    }),
-    prisma.paymentHistory.findMany({
-      include: {
-        user: { select: { name: true, email: true } },
-        stripeProduct: { select: { name: true } },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-    }),
-  ]);
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.user.count(),
+      prisma.paymentHistory.aggregate({
+        _sum: { amount: true },
+      }),
+    ]);
 
   const stats = {
-    totalUsers: users.length,
+    totalUsers: totalUsersCount,
     activeSubscriptions: subscriptions.length,
-    totalRevenue: payments.reduce((sum, payment) => sum + payment.amount, 0),
-    totalProducts: products.length,
+    totalRevenue: totalRevenue._sum.amount || 0,
   };
 
   return (
-    <AdminDashboard
-      users={users}
-      products={products}
-      subscriptions={subscriptions}
-      payments={payments}
-      stats={stats}
-    />
+    <AdminDashboard users={users} subscriptions={subscriptions} stats={stats} />
   );
 }

@@ -1,6 +1,12 @@
+import { Navbar } from "@/components/navbar";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { Toaster } from "@/components/ui/sonner";
 import getSession from "@/lib/auth";
+import {
+  checkUserAccess,
+  getUserTokens,
+  isUserAdmin,
+} from "@/lib/subscription";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -27,6 +33,25 @@ export default async function RootLayout({
 }) {
   const session = await getSession();
 
+  // Get user data for navbar if authenticated
+  let navbarData = {};
+  if (session?.user) {
+    const [{ hasAccess, subscription }, tokenInfo, adminStatus] =
+      await Promise.all([
+        checkUserAccess(session.user.id),
+        getUserTokens(session.user.id),
+        isUserAdmin(session.user.id),
+      ]);
+
+    navbarData = {
+      user: session.user,
+      hasAccess,
+      tokenInfo,
+      isAdmin: adminStatus,
+      hasSubscription: !!subscription,
+    };
+  }
+
   return (
     <html lang="en">
       <head>
@@ -36,6 +61,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionProvider session={session}>
+          <Navbar {...navbarData} />
           {children}
           <Toaster />
         </SessionProvider>
