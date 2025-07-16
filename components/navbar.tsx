@@ -121,7 +121,7 @@ export function Navbar({
                 ) : (
                   <Link
                     href="/pricing"
-                    className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors"
+                    className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-1"
                   >
                     Pricing
                   </Link>
