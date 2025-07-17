@@ -127,7 +127,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 
 - **Configuration**: `lib/stripe.ts` for client, `lib/stripe-admin.ts` for server operations
 - **Checkout Flow**: POST to `/api/stripe/checkout` with `priceId`
-- **Webhooks**: Handled in `/api/stripe/webhook/route.ts`
+- **Webhooks**: Handled in `/api/stripe/webhooks/route.ts`
 - **Products/Prices**: Synced via webhooks to database
 - **Customer Management**: Auto-create/retrieve customers in checkout flow
 
@@ -136,7 +136,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 ```
 /api/auth/[...nextauth]     # NextAuth handler
 /api/stripe/checkout        # Create checkout sessions
-/api/stripe/webhook         # Process Stripe webhooks
+/api/stripe/webhooks         # Process Stripe webhooks
 /api/admin/update-user      # Admin user management
 ```
 

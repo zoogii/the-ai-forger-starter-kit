@@ -370,6 +370,26 @@ If you encounter a JWT session error, it's usually due to:
 
 To test webhooks locally:
 
+Installation: https://docs.stripe.com/stripe-cli?install-method=linux
+
+For wsl:
+
+# Add Stripe's GPG key
+
+curl -s https://packages.stripe.dev/api/security/keypair/stripe-cli-gpg/public | gpg --dearmor | sudo tee /usr/share/keyrings/stripe.gpg > /dev/null
+
+# Add Stripe's repository
+
+echo "deb [signed-by=/usr/share/keyrings/stripe.gpg] https://packages.stripe.dev/stripe-cli-debian-local stable main" | sudo tee -a /etc/apt/sources.list.d/stripe.list
+
+# Update package list
+
+sudo apt update
+
+# Install Stripe CLI
+
+sudo apt install stripe
+
 ```bash
 stripe listen --forward-to localhost:3000/api/stripe/webhooks
 ```
