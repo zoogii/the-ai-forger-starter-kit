@@ -53,13 +53,14 @@ export default async function PricingPage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto mb-16">
+        <div className="flex flex-wrap justify-center gap-8 max-w-7xl mx-auto mb-16">
           {membershipTiers.map((tier: any) => (
-            <PricingCard
-              key={tier.id}
-              tier={tier}
-              stripeProducts={tier.stripeProducts}
-            />
+            <div key={tier.id} className="w-full md:w-80 lg:w-72 xl:w-80">
+              <PricingCard
+                tier={tier}
+                stripeProducts={tier.stripeProducts}
+              />
+            </div>
           ))}
         </div>
 

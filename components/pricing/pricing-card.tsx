@@ -127,9 +127,8 @@ export function PricingCard({ tier, stripeProducts }: PricingCardProps) {
 
   return (
     <Card
-      className={`relative ${
-        isPopular ? "border-blue-500 shadow-lg scale-105" : "border-gray-200"
-      }`}
+      className={`relative ${isPopular ? "border-blue-500 shadow-lg scale-105" : "border-gray-200"
+        }`}
     >
       {isPopular && (
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -155,7 +154,7 @@ export function PricingCard({ tier, stripeProducts }: PricingCardProps) {
       </CardHeader>
 
       <CardContent>
-        <ul className="space-y-3 mb-6 min-h-[12rem]">
+        <ul className="space-y-3 mb-6 min-h-[4rem]">
           {tier.features.map((feature, index) => (
             <li key={index} className="flex items-start">
               <span className="text-green-500 mr-2 mt-0.5 flex-shrink-0">
@@ -167,9 +166,8 @@ export function PricingCard({ tier, stripeProducts }: PricingCardProps) {
         </ul>
 
         <Button
-          className={`w-full ${
-            isPopular ? "bg-blue-500 hover:bg-blue-600" : ""
-          }`}
+          className={`w-full ${isPopular ? "bg-blue-500 hover:bg-blue-600" : ""
+            }`}
           variant={isFree ? "outline" : "default"}
           onClick={handleSubscribe}
           disabled={isLoading}
@@ -177,8 +175,8 @@ export function PricingCard({ tier, stripeProducts }: PricingCardProps) {
           {isLoading
             ? "Processing..."
             : isFree
-            ? "Get Started"
-            : `Subscribe to ${tier.displayName}`}
+              ? "Get Started"
+              : `Subscribe to ${tier.displayName}`}
         </Button>
 
         {!isFree && !stripePrice && (
