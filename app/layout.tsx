@@ -23,7 +23,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VibeCoding Stack",
+  title: "Forger Starter Kit",
   description: "Next.js starter with NextAuth and Stripe",
 };
 

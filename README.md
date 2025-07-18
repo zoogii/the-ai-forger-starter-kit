@@ -1,4 +1,4 @@
-# VibeCoding Stack - Next.js + Stripe + NextAuth
+# Forger Starter Kit - Next.js + Stripe + NextAuth
 
 A complete full-stack starter kit that integrates Next.js with Stripe payments, NextAuth authentication, and ShadcnUI components. This project provides a solid foundation for building SaaS applications with subscription-based business models.
 
@@ -106,7 +106,7 @@ Create a `.env.local` file in the root directory with the following variables:
 
 ```env
 # Database
-DATABASE_URL="postgresql://postgres:password@localhost:5432/vibecoding"
+DATABASE_URL="postgresql://postgres:password@localhost:5432/forger_starter_kit"
 
 # NextAuth (Generate a random secret with: openssl rand -base64 32)
 NEXTAUTH_URL="http://localhost:3000"
