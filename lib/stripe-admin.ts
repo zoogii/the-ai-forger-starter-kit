@@ -216,12 +216,23 @@ export const manageSubscriptionStatusChange = async (
       subscription.status === "active" ||
       subscription.status === "trialing"
     ) {
+      // Get current user to check if they're an admin
+      const currentUser = await prisma.user.findUnique({
+        where: { id: customerData.userId },
+        select: { role: true },
+      });
+
+      // Preserve admin role, otherwise set to premium
+      const role = currentUser?.role === UserRole.ADMIN 
+        ? UserRole.ADMIN 
+        : UserRole.PREMIUM;
+
       await prisma.user.update({
         where: { id: customerData.userId },
         data: {
           stripeProductId: priceData.productId,
           membershipStatus: MembershipStatus.ACTIVE,
-          role: UserRole.PREMIUM,
+          role,
         },
       });
 
@@ -230,12 +241,23 @@ export const manageSubscriptionStatusChange = async (
       subscription.status === "canceled" ||
       subscription.status === "incomplete_expired"
     ) {
+      // Get current user to check if they're an admin
+      const currentUser = await prisma.user.findUnique({
+        where: { id: customerData.userId },
+        select: { role: true },
+      });
+
+      // Preserve admin role, otherwise set to user
+      const role = currentUser?.role === UserRole.ADMIN 
+        ? UserRole.ADMIN 
+        : UserRole.USER;
+
       await prisma.user.update({
         where: { id: customerData.userId },
         data: {
           stripeProductId: null,
           membershipStatus: MembershipStatus.INACTIVE,
-          role: UserRole.USER,
+          role,
         },
       });
     }
