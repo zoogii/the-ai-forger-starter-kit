@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 import { PrismaClient, UserRole } from "../app/generated/prisma";
 
 const prisma = new PrismaClient();

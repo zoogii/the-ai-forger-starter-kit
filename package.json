@@ -7,12 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:sync-stripe": "tsx prisma/seed.ts",
+    "db:sync-stripe": "tsx prisma/sync-stripe-products.ts",
     "db:setup-admin": "tsx prisma/seed-admin.ts",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
-    "db:reset": "prisma migrate reset",
-    "stripe:sync": "tsx scripts/sync-stripe-products.ts"
+    "db:reset": "prisma migrate reset"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
