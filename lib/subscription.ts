@@ -3,10 +3,43 @@ import {
   PrismaClient,
   UserRole,
 } from "../app/generated/prisma";
+import { stripe } from "./stripe";
+import { manageSubscriptionStatusChange } from "./stripe-admin";
 
 const prisma = new PrismaClient();
 
-export const getUserSubscription = async (userId: string) => {
+export const syncUserStripeData = async (userId: string) => {
+  try {
+    const customer = await prisma.stripeCustomer.findUnique({
+      where: { userId },
+    });
+
+    if (!customer) return;
+
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customer.stripeCustomerId,
+      limit: 10,
+    });
+
+    for (const subscription of subscriptions.data) {
+      await manageSubscriptionStatusChange(
+        subscription.id,
+        subscription.customer as string,
+        false
+      );
+    }
+
+    console.log(`Synced data for user ${userId}`);
+  } catch (error) {
+    console.error('Sync failed:', error);
+  }
+};
+
+export const getUserSubscription = async (userId: string, autoSync = true) => {
+  if (autoSync) {
+    await syncUserStripeData(userId);
+  }
+  
   return await prisma.userSubscription.findFirst({
     where: {
       userId,
@@ -140,7 +173,12 @@ export const isUserAdmin = async (userId: string): Promise<boolean> => {
   return user?.role === UserRole.ADMIN;
 };
 
-export async function checkUserAccess(userId: string) {
+export async function checkUserAccess(userId: string, autoSync = true) {
+  // Auto-sync user data if enabled
+  if (autoSync) {
+    await syncUserStripeData(userId);
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
