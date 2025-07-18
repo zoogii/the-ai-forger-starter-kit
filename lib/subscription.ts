@@ -220,7 +220,16 @@ export async function updateUserMembership(
   stripeProductId: string | null,
   membershipStatus: MembershipStatus = MembershipStatus.ACTIVE
 ) {
-  const role = stripeProductId ? UserRole.PREMIUM : UserRole.USER;
+  // Get current user to check if they're an admin
+  const currentUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+
+  // Preserve admin role, otherwise set based on subscription
+  const role = currentUser?.role === UserRole.ADMIN 
+    ? UserRole.ADMIN 
+    : stripeProductId ? UserRole.PREMIUM : UserRole.USER;
 
   await prisma.user.update({
     where: { id: userId },
