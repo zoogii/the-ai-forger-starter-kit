@@ -8,6 +8,12 @@ import { manageSubscriptionStatusChange } from "./stripe-admin";
 
 const prisma = new PrismaClient();
 
+// Cache for product sync to prevent frequent API calls
+let productSyncCache = {
+  lastSync: 0,
+  cacheDuration: 5 * 60 * 1000, // 5 minutes
+};
+
 export const syncUserStripeData = async (userId: string) => {
   try {
     const customer = await prisma.stripeCustomer.findUnique({
@@ -32,6 +38,102 @@ export const syncUserStripeData = async (userId: string) => {
     console.log(`Synced data for user ${userId}`);
   } catch (error) {
     console.error('Sync failed:', error);
+  }
+};
+
+export const syncStripeProductsAuto = async (force = false) => {
+  const now = Date.now();
+  
+  // Check if we need to sync (only if cache expired or forced)
+  if (!force && now - productSyncCache.lastSync < productSyncCache.cacheDuration) {
+    console.log('Products sync skipped - using cached data');
+    return;
+  }
+
+  try {
+    console.log('🔄 Auto-syncing products from Stripe...');
+
+    // Fetch all active products from Stripe
+    const products = await stripe.products.list({
+      active: true,
+      expand: ["data.default_price"],
+    });
+
+    // Fetch all prices for the products
+    const prices = await stripe.prices.list({
+      active: true,
+    });
+
+    // Group prices by product
+    const pricesByProduct = prices.data.reduce(
+      (acc: Record<string, any[]>, price: any) => {
+        const productId =
+          typeof price.product === "string" ? price.product : price.product.id;
+        if (!acc[productId]) {
+          acc[productId] = [];
+        }
+        acc[productId].push(price);
+        return acc;
+      },
+      {} as Record<string, any[]>
+    );
+
+    // Mark all existing products as inactive
+    await prisma.stripeProduct.updateMany({
+      data: { active: false },
+    });
+
+    await prisma.stripePrice.updateMany({
+      data: { active: false },
+    });
+
+    // Process each Stripe product
+    for (const product of products.data) {
+      // Upsert the product
+      const productData = {
+        id: product.id,
+        name: product.name,
+        description: product.description || null,
+        active: product.active,
+        metadata: product.metadata || {},
+      };
+
+      await prisma.stripeProduct.upsert({
+        where: { id: product.id },
+        update: productData,
+        create: productData,
+      });
+
+      // Process prices for this product
+      const productPrices = pricesByProduct[product.id] || [];
+      for (const price of productPrices) {
+        const priceData = {
+          id: price.id,
+          productId: product.id,
+          active: price.active,
+          currency: price.currency,
+          type: price.type,
+          unitAmount: price.unit_amount || null,
+          interval: price.recurring?.interval || null,
+          intervalCount: price.recurring?.interval_count || null,
+          trialPeriodDays: price.recurring?.trial_period_days || null,
+          metadata: price.metadata || {},
+        };
+
+        await prisma.stripePrice.upsert({
+          where: { id: price.id },
+          update: priceData,
+          create: priceData,
+        });
+      }
+    }
+
+    // Update cache timestamp
+    productSyncCache.lastSync = now;
+    console.log('✅ Products auto-sync completed successfully!');
+  } catch (error) {
+    console.error('❌ Auto-sync failed:', error);
+    // Don't throw error to prevent page from breaking
   }
 };
 
@@ -241,8 +343,13 @@ export async function updateUserMembership(
   });
 }
 
-export async function getStripeProducts() {
+export async function getStripeProducts(autoSync = true) {
   try {
+    // Auto-sync products if enabled
+    if (autoSync) {
+      await syncStripeProductsAuto();
+    }
+
     return await prisma.stripeProduct.findMany({
       where: { active: true },
       orderBy: { name: "asc" },
@@ -291,9 +398,9 @@ export function getProductDisplayName(product: any): string {
 }
 
 // Legacy function for backward compatibility - maps to new system
-export async function getMembershipTiers() {
+export async function getMembershipTiers(autoSync = true) {
   try {
-    const products = await getStripeProducts();
+    const products = await getStripeProducts(autoSync);
 
     // Transform Stripe products to look like old membership tiers for compatibility
     return products.map((product, index) => ({
