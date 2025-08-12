@@ -27,28 +27,26 @@ export default function HomePage() {
             <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm">
               <Star className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium text-blue-600">
-                Welcome to Forger Starter Kit
+                Хиймэл оюун ухаан автоматжуулалтын систем
               </span>
             </div>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-8 leading-tight">
-            Your Coding Journey
+            Таны хиймэл оюун ухааны аялал
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-              Starts Here
+            эндээс эхэлнэ
             </span>
           </h1>
 
           <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Learn, build, and grow with our comprehensive platform. Get access
-            to premium tutorials, exclusive content, and a thriving community of
-            developers.
+            Өөрт хэрэгтэй бүтээгдэхүүнээ эндээс ашиглаж ажилаа хөнгөвчлөхийн зэрэгцээ бидэнтэй нэгдэж хиймэл оюун ухааны талаар суралцаарай.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button asChild size="lg" className="px-8 py-3 text-lg">
               <Link href="/auth/signin" className="flex items-center gap-2">
-                Get Started Free
+                Үнэгүй бүртгүүлэх
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </Button>
@@ -58,7 +56,7 @@ export default function HomePage() {
               size="lg"
               className="px-8 py-3 text-lg"
             >
-              <Link href="/pricing">View Pricing</Link>
+              <Link href="/pricing">Үнийн мэдээлэл</Link>
             </Button>
           </div>
         </div>
